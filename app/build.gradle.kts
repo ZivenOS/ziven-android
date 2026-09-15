@@ -58,7 +58,7 @@ android {
         create("dev") {
             dimension = "environment"
             applicationIdSuffix = ".dev"
-            buildConfigField("String", "BASE_URL", "\"http://10.0.2.2:3200\"")
+            buildConfigField("String", "BASE_URL", "\"${localProperties["baseUrl"] ?: "http://10.0.2.2:3200"}\"")
         }
         create("prod") {
             dimension = "environment"
