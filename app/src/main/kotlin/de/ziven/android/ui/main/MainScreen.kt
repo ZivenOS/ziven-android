@@ -19,10 +19,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.hilt.navigation.compose.hiltViewModel
 import de.ziven.android.R
+import de.ziven.android.ui.plan.PlanScreen
+import de.ziven.android.ui.plan.PlanViewModel
+import de.ziven.android.ui.today.TodayScreen
+import de.ziven.android.ui.today.TodayViewModel
 
 @Composable
-fun MainScreen(onLogout: () -> Unit) {
+fun MainScreen(onLogout: () -> Unit, onCookSlot: (String) -> Unit) {
     var selected by remember { mutableIntStateOf(0) }
     val items = listOf(
         stringResource(R.string.nav_today) to Icons.Default.Home,
@@ -48,8 +53,8 @@ fun MainScreen(onLogout: () -> Unit) {
     ) { padding ->
         val modifier = Modifier.padding(padding)
         when (selected) {
-            0 -> TodayPlaceholder(modifier)
-            1 -> PlanPlaceholder(modifier)
+            0 -> TodayScreen(onCookSlot = onCookSlot, viewModel = hiltViewModel())
+            1 -> PlanScreen(onCookSlot = onCookSlot, viewModel = hiltViewModel())
             2 -> ListPlaceholder(modifier)
             3 -> PantryPlaceholder(modifier)
             4 -> MorePlaceholder(modifier)
@@ -57,10 +62,6 @@ fun MainScreen(onLogout: () -> Unit) {
     }
 }
 
-@Composable
-fun TodayPlaceholder(modifier: Modifier) = CenteredText("Heute", modifier)
-@Composable
-fun PlanPlaceholder(modifier: Modifier) = CenteredText("Plan", modifier)
 @Composable
 fun ListPlaceholder(modifier: Modifier) = CenteredText("Liste", modifier)
 @Composable

@@ -3,19 +3,24 @@ package de.ziven.android.navigation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.hilt.navigation.compose.hiltViewModel
-
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.navArgument
 import de.ziven.android.ui.auth.AuthViewModel
 import de.ziven.android.ui.auth.LoginScreen
 import de.ziven.android.ui.auth.RegisterScreen
+import de.ziven.android.ui.cook.CookScreen
 import de.ziven.android.ui.main.MainScreen
 
 sealed class Screen(val route: String) {
     data object Login : Screen("login")
     data object Register : Screen("register")
     data object Main : Screen("main")
+    data object Cook : Screen("cook/{slotId}") {
+        fun createRoute(slotId: String) = "cook/${slotId}"
+    }
 }
 
 @Composable
@@ -39,7 +44,22 @@ fun ZivenNavHost(navController: NavHostController) {
             )
         }
         composable(Screen.Main.route) {
-            MainScreen(onLogout = { navController.navigate(Screen.Login.route) { popUpTo(Screen.Main.route) { inclusive = true } } })
+            MainScreen(
+                onLogout = {
+                    navController.navigate(Screen.Login.route) { popUpTo(Screen.Main.route) { inclusive = true } }
+                },
+                onCookSlot = { slotId ->
+                    navController.navigate(Screen.Cook.createRoute(slotId))
+                },
+            )
+        }
+        composable(
+            route = Screen.Cook.route,
+            arguments = listOf(navArgument("slotId") { type = NavType.StringType }),
+        ) {
+            CookScreen(
+                onFinished = { navController.popBackStack() },
+            )
         }
     }
 }

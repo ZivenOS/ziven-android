@@ -1,9 +1,15 @@
 package de.ziven.shared.api
 
 import de.ziven.shared.model.AuthUser
+import de.ziven.shared.model.CompleteCookRequest
+import de.ziven.shared.model.CookSession
 import de.ziven.shared.model.Credentials
+import de.ziven.shared.model.GeneratePlanRequest
+import de.ziven.shared.model.GeneratePlanResponse
 import de.ziven.shared.model.MobileAuthResponse
 import de.ziven.shared.model.OkResponse
+import de.ziven.shared.model.PlanView
+import de.ziven.shared.model.StartCookRequest
 import de.ziven.shared.model.TokenBody
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
@@ -56,4 +62,33 @@ class ApiClient(baseUrl: String) {
 
     suspend fun me(token: String): AuthUser =
         client.get("/v1/auth/me") { bearerAuth(token) }.body()
+
+    // Plan
+    suspend fun getPlan(token: String, week: String): PlanView =
+        client.get("/v1/plan") {
+            bearerAuth(token)
+            url { parameters.append("week", week) }
+        }.body()
+
+    suspend fun generatePlan(token: String, request: GeneratePlanRequest): GeneratePlanResponse =
+        client.post("/v1/plan/generate") {
+            bearerAuth(token)
+            setBody(request)
+        }.body()
+
+    // Cook
+    suspend fun startCook(token: String, request: StartCookRequest): CookSession =
+        client.post("/v1/cook/sessions") {
+            bearerAuth(token)
+            setBody(request)
+        }.body()
+
+    suspend fun getCookSession(token: String, id: String): CookSession =
+        client.get("/v1/cook/sessions/${id}") { bearerAuth(token) }.body()
+
+    suspend fun completeCook(token: String, id: String, request: CompleteCookRequest = CompleteCookRequest()): CookSession =
+        client.post("/v1/cook/sessions/${id}/complete") {
+            bearerAuth(token)
+            setBody(request)
+        }.body()
 }
