@@ -1,14 +1,22 @@
 package de.ziven.shared.api
 
 import de.ziven.shared.model.AuthUser
+import de.ziven.shared.model.CheckItemRequest
 import de.ziven.shared.model.CompleteCookRequest
 import de.ziven.shared.model.CookSession
 import de.ziven.shared.model.Credentials
+import de.ziven.shared.model.GenerateListRequest
 import de.ziven.shared.model.GeneratePlanRequest
 import de.ziven.shared.model.GeneratePlanResponse
 import de.ziven.shared.model.MobileAuthResponse
 import de.ziven.shared.model.OkResponse
+import de.ziven.shared.model.PantryInput
+import de.ziven.shared.model.PantryItem
+import de.ziven.shared.model.PantryPatch
 import de.ziven.shared.model.PlanView
+import de.ziven.shared.model.Product
+import de.ziven.shared.model.ProductSuggestions
+import de.ziven.shared.model.ShoppingList
 import de.ziven.shared.model.StartCookRequest
 import de.ziven.shared.model.TokenBody
 import io.ktor.client.HttpClient
@@ -19,8 +27,10 @@ import io.ktor.client.plugins.defaultRequest
 import io.ktor.client.plugins.logging.LogLevel
 import io.ktor.client.plugins.logging.Logging
 import io.ktor.client.request.bearerAuth
+import io.ktor.client.request.delete
 import io.ktor.client.request.get
 import io.ktor.client.request.header
+import io.ktor.client.request.patch
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
@@ -90,5 +100,56 @@ class ApiClient(baseUrl: String) {
         client.post("/v1/cook/sessions/${id}/complete") {
             bearerAuth(token)
             setBody(request)
+        }.body()
+
+    // Shop
+    suspend fun getShoppingList(token: String, week: String): ShoppingList =
+        client.get("/v1/shop") {
+            bearerAuth(token)
+            url { parameters.append("week", week) }
+        }.body()
+
+    suspend fun generateShoppingList(token: String, week: String): ShoppingList =
+        client.post("/v1/shop/generate") {
+            bearerAuth(token)
+            setBody(GenerateListRequest(week))
+        }.body()
+
+    suspend fun checkShopItem(token: String, itemId: String, checked: Boolean): OkResponse =
+        client.post("/v1/shop/items/${itemId}/check") {
+            bearerAuth(token)
+            setBody(CheckItemRequest(checked))
+        }.body()
+
+    // Pantry
+    suspend fun listPantry(token: String): List<PantryItem> =
+        client.get("/v1/pantry") { bearerAuth(token) }.body()
+
+    suspend fun addPantryItem(token: String, input: PantryInput): PantryItem =
+        client.post("/v1/pantry") {
+            bearerAuth(token)
+            setBody(input)
+        }.body()
+
+    suspend fun updatePantryItem(token: String, itemId: String, patch: PantryPatch): PantryItem =
+        client.patch("/v1/pantry/${itemId}") {
+            bearerAuth(token)
+            setBody(patch)
+        }.body()
+
+    suspend fun discardPantryItem(token: String, itemId: String): PantryItem =
+        client.post("/v1/pantry/${itemId}/discard") { bearerAuth(token) }.body()
+
+    suspend fun deletePantryItem(token: String, itemId: String): OkResponse =
+        client.delete("/v1/pantry/${itemId}") { bearerAuth(token) }.body()
+
+    // Products
+    suspend fun getProduct(token: String, code: String): Product =
+        client.get("/v1/products/${code}") { bearerAuth(token) }.body()
+
+    suspend fun suggestProducts(token: String, query: String): ProductSuggestions =
+        client.get("/v1/products/suggest") {
+            bearerAuth(token)
+            url { parameters.append("q", query) }
         }.body()
 }

@@ -21,6 +21,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import de.ziven.android.R
+import de.ziven.android.ui.list.ListScreen
+import de.ziven.android.ui.list.ListViewModel
+import de.ziven.android.ui.pantry.PantryScreen
+import de.ziven.android.ui.pantry.PantryViewModel
 import de.ziven.android.ui.plan.PlanScreen
 import de.ziven.android.ui.plan.PlanViewModel
 import de.ziven.android.ui.today.TodayScreen
@@ -55,8 +59,8 @@ fun MainScreen(onLogout: () -> Unit, onCookSlot: (String) -> Unit) {
         when (selected) {
             0 -> TodayScreen(onCookSlot = onCookSlot, viewModel = hiltViewModel())
             1 -> PlanScreen(onCookSlot = onCookSlot, viewModel = hiltViewModel())
-            2 -> ListPlaceholder(modifier)
-            3 -> PantryPlaceholder(modifier)
+            2 -> ListScreen(viewModel = hiltViewModel())
+            3 -> PantryScreen(viewModel = hiltViewModel())
             4 -> MorePlaceholder(modifier)
         }
     }
