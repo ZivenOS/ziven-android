@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="soil">#14110E</color>
+    <color name="pulse">#D4924A</color>
+    <color name="moss">#6B8F71</color>
+    <color name="canopy">#F3EFE6</color>
+    <color name="vein">#4D7A6E</color>
+    <color name="ink">#1C1712</color>
+</resources>
