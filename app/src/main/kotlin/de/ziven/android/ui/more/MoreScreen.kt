@@ -17,7 +17,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.ExitToApp
+import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Share
@@ -120,7 +120,7 @@ fun MoreHub(onPage: (MorePage) -> Unit, onLogout: () -> Unit) {
         item { HubCard("Rechtliches", Icons.Default.Info) { onPage(MorePage.Legal) } }
         item { HubCard("Daten exportieren", Icons.Default.Share) { onPage(MorePage.Export) } }
         item { HubCard("Account löschen", Icons.Default.Delete) { onPage(MorePage.Delete) } }
-        item { HubCard("Abmelden", Icons.Default.ExitToApp) { onLogout() } }
+        item { HubCard("Abmelden", Icons.AutoMirrored.Filled.ExitToApp) { onLogout() } }
     }
 }
 
