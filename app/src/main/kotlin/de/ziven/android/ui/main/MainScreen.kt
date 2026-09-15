@@ -31,7 +31,7 @@ import de.ziven.android.ui.today.TodayScreen
 import de.ziven.android.ui.today.TodayViewModel
 
 @Composable
-fun MainScreen(onLogout: () -> Unit, onCookSlot: (String) -> Unit) {
+fun MainScreen(onLogout: () -> Unit, onCookSlot: (String) -> Unit, onScanBarcode: () -> Unit) {
     var selected by remember { mutableIntStateOf(0) }
     val items = listOf(
         stringResource(R.string.nav_today) to Icons.Default.Home,
@@ -60,7 +60,7 @@ fun MainScreen(onLogout: () -> Unit, onCookSlot: (String) -> Unit) {
             0 -> TodayScreen(onCookSlot = onCookSlot, viewModel = hiltViewModel())
             1 -> PlanScreen(onCookSlot = onCookSlot, viewModel = hiltViewModel())
             2 -> ListScreen(viewModel = hiltViewModel())
-            3 -> PantryScreen(viewModel = hiltViewModel())
+            3 -> PantryScreen(onScanBarcode = onScanBarcode, viewModel = hiltViewModel())
             4 -> MorePlaceholder(modifier)
         }
     }

@@ -11,6 +11,7 @@ import androidx.navigation.navArgument
 import de.ziven.android.ui.auth.AuthViewModel
 import de.ziven.android.ui.auth.LoginScreen
 import de.ziven.android.ui.auth.RegisterScreen
+import de.ziven.android.ui.barcode.BarcodeScreen
 import de.ziven.android.ui.cook.CookScreen
 import de.ziven.android.ui.main.MainScreen
 
@@ -21,6 +22,7 @@ sealed class Screen(val route: String) {
     data object Cook : Screen("cook/{slotId}") {
         fun createRoute(slotId: String) = "cook/${slotId}"
     }
+    data object Barcode : Screen("barcode")
 }
 
 @Composable
@@ -51,6 +53,7 @@ fun ZivenNavHost(navController: NavHostController) {
                 onCookSlot = { slotId ->
                     navController.navigate(Screen.Cook.createRoute(slotId))
                 },
+                onScanBarcode = { navController.navigate(Screen.Barcode.route) },
             )
         }
         composable(
@@ -60,6 +63,9 @@ fun ZivenNavHost(navController: NavHostController) {
             CookScreen(
                 onFinished = { navController.popBackStack() },
             )
+        }
+        composable(Screen.Barcode.route) {
+            BarcodeScreen(onDone = { navController.popBackStack() })
         }
     }
 }

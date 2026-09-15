@@ -39,7 +39,7 @@ import de.ziven.shared.model.PantryItem
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PantryScreen(viewModel: PantryViewModel) {
+fun PantryScreen(onScanBarcode: () -> Unit, viewModel: PantryViewModel) {
     val state by viewModel.uiState.collectAsState()
     var showAdd by remember { mutableStateOf(false) }
 
@@ -79,6 +79,10 @@ fun PantryScreen(viewModel: PantryViewModel) {
     if (showAdd) {
         AddProductDialog(
             onDismiss = { showAdd = false },
+            onScan = {
+                showAdd = false
+                onScanBarcode()
+            },
             onAdd = { barcode, name, brand, quantity, unit ->
                 viewModel.addProduct(barcode, name, brand, quantity, unit)
                 showAdd = false
@@ -111,6 +115,7 @@ fun PantryItemCard(item: PantryItem, onDiscard: () -> Unit, onDelete: () -> Unit
 @Composable
 fun AddProductDialog(
     onDismiss: () -> Unit,
+    onScan: () -> Unit,
     onAdd: (barcode: String, name: String, brand: String?, quantity: Double, unit: String) -> Unit,
 ) {
     var barcode by remember { mutableStateOf("") }
@@ -135,6 +140,7 @@ fun AddProductDialog(
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                 )
                 OutlinedTextField(value = unit, onValueChange = { unit = it }, label = { Text("Einheit") }, singleLine = true)
+                TextButton(onClick = onScan) { Text("Barcode scannen") }
             }
         },
         confirmButton = {
