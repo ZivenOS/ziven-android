@@ -31,10 +31,17 @@ class CookViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.value = CookUiState.Loading
             try {
+                val cached = repository.cachedCookSession()
                 val session = repository.startCook(slotId)
+                repository.saveCookSession(session)
                 _uiState.value = CookUiState.Success(session)
             } catch (e: Exception) {
-                _uiState.value = CookUiState.Error(e.message ?: "Could not start cook session")
+                val cached = repository.cachedCookSession()
+                if (cached != null) {
+                    _uiState.value = CookUiState.Success(cached)
+                } else {
+                    _uiState.value = CookUiState.Error(e.message ?: "Could not start cook session")
+                }
             }
         }
     }
@@ -45,6 +52,7 @@ class CookViewModel @Inject constructor(
             _uiState.value = CookUiState.Loading
             try {
                 val completed = repository.completeCook(current.session.id)
+                repository.saveCookSession(completed)
                 _uiState.value = CookUiState.Done(completed)
             } catch (e: Exception) {
                 _uiState.value = CookUiState.Error(e.message ?: "Could not complete session")

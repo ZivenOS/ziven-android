@@ -8,6 +8,7 @@ import de.ziven.android.ui.common.isoDayOfWeek
 import de.ziven.android.ui.common.mondayIsoOf
 import de.ziven.android.ui.common.todayIso
 import de.ziven.shared.model.PlanSlot
+import de.ziven.shared.model.PlanView
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -31,16 +32,25 @@ class TodayViewModel @Inject constructor(
             _uiState.value = TodayUiState.Loading
             try {
                 val weekStart = mondayIsoOf()
-                val plan = repository.getPlan(weekStart)
                 val today = todayIso()
-                val todaySlots = plan.slots
-                    .filter { isoDayOfWeek(it.weekStart) + it.day == isoDayOfWeek(today) }
-                    .sortedWith(slotOrder)
-                _uiState.value = TodayUiState.Success(today, todaySlots)
+                val cached = repository.cachedPlan()
+                cached?.let { emitToday(it, today) }
+                val plan = repository.getPlan(weekStart)
+                repository.savePlan(plan)
+                emitToday(plan, today)
             } catch (e: Exception) {
-                _uiState.value = TodayUiState.Error(e.message ?: "Could not load today")
+                if (_uiState.value !is TodayUiState.Success) {
+                    _uiState.value = TodayUiState.Error(e.message ?: "Could not load today")
+                }
             }
         }
+    }
+
+    private fun emitToday(plan: PlanView, today: String) {
+        val todaySlots = plan.slots
+            .filter { isoDayOfWeek(it.weekStart) + it.day == isoDayOfWeek(today) }
+            .sortedWith(slotOrder)
+        _uiState.value = TodayUiState.Success(today, todaySlots)
     }
 
     fun generateWeek() {

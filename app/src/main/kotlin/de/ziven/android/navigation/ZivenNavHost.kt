@@ -14,10 +14,12 @@ import de.ziven.android.ui.auth.RegisterScreen
 import de.ziven.android.ui.barcode.BarcodeScreen
 import de.ziven.android.ui.cook.CookScreen
 import de.ziven.android.ui.main.MainScreen
+import de.ziven.android.ui.preview.PreviewScreen
 
 sealed class Screen(val route: String) {
     data object Login : Screen("login")
     data object Register : Screen("register")
+    data object Preview : Screen("preview")
     data object Main : Screen("main")
     data object Cook : Screen("cook/{slotId}") {
         fun createRoute(slotId: String) = "cook/${slotId}"
@@ -37,12 +39,18 @@ fun ZivenNavHost(navController: NavHostController) {
             LoginScreen(
                 onLogin = { navController.navigate(Screen.Main.route) { popUpTo(Screen.Login.route) { inclusive = true } } },
                 onGoToRegister = { navController.navigate(Screen.Register.route) },
+                onPreview = { navController.navigate(Screen.Preview.route) },
             )
         }
         composable(Screen.Register.route) {
             RegisterScreen(
-                onRegister = { navController.navigate(Screen.Login.route) { popUpTo(Screen.Register.route) { inclusive = true } } },
+                onRegister = { navController.navigate(Screen.Main.route) { popUpTo(Screen.Register.route) { inclusive = true } } },
                 onGoToLogin = { navController.popBackStack() },
+            )
+        }
+        composable(Screen.Preview.route) {
+            PreviewScreen(
+                onRegisterForImport = { navController.navigate(Screen.Register.route) { popUpTo(Screen.Preview.route) { inclusive = true } } },
             )
         }
         composable(Screen.Main.route) {

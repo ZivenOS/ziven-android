@@ -82,6 +82,7 @@ dependencies {
     implementation(libs.androidx.hilt.navigation.compose)
     implementation(libs.androidx.security.crypto)
     implementation(libs.androidx.work.runtime)
+    implementation(libs.androidx.datastore.preferences)
 
     // Camera + barcode
     implementation(libs.androidx.camera.core)
@@ -95,6 +96,13 @@ dependencies {
 
     implementation(libs.timber)
     implementation(libs.google.mlkit.barcode)
+    implementation(libs.kotlinx.serialization.json)
 
     testImplementation(libs.junit)
+
+    androidTestImplementation(platform(libs.androidx.compose.bom))
+    androidTestImplementation(libs.androidx.compose.ui.test.junit4)
+    androidTestImplementation(libs.androidx.test.ext.junit)
+    androidTestImplementation(libs.androidx.espresso.core)
+    debugImplementation(libs.androidx.compose.ui.test.manifest)
 }

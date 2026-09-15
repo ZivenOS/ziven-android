@@ -6,6 +6,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import de.ziven.android.data.plan.PlanRepository
 import de.ziven.android.ui.common.mondayIsoOf
 import de.ziven.shared.model.PlanSlot
+import de.ziven.shared.model.PlanView
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -28,13 +29,22 @@ class PlanViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.value = PlanUiState.Loading
             try {
+                val cached = repository.cachedPlan()
+                cached?.let { emitPlan(it) }
                 val plan = repository.getPlan(weekStart)
-                val grouped = plan.slots.groupBy { it.day }.toSortedMap()
-                _uiState.value = PlanUiState.Success(weekStart, grouped)
+                repository.savePlan(plan)
+                emitPlan(plan)
             } catch (e: Exception) {
-                _uiState.value = PlanUiState.Error(e.message ?: "Could not load plan")
+                if (_uiState.value !is PlanUiState.Success) {
+                    _uiState.value = PlanUiState.Error(e.message ?: "Could not load plan")
+                }
             }
         }
+    }
+
+    private fun emitPlan(plan: PlanView) {
+        val grouped = plan.slots.groupBy { it.day }.toSortedMap()
+        _uiState.value = PlanUiState.Success(plan.weekStart, grouped)
     }
 
     fun generate(weekStart: String = mondayIsoOf()) {

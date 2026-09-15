@@ -27,10 +27,15 @@ class ListViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.value = ListUiState.Loading
             try {
+                val cached = repository.cachedList()
+                cached?.let { _uiState.value = ListUiState.Success(it) }
                 val list = repository.getList(mondayIsoOf())
+                repository.saveList(list)
                 _uiState.value = ListUiState.Success(list)
             } catch (e: Exception) {
-                _uiState.value = ListUiState.Error(e.message ?: "Could not load list")
+                if (_uiState.value !is ListUiState.Success) {
+                    _uiState.value = ListUiState.Error(e.message ?: "Could not load list")
+                }
             }
         }
     }
@@ -40,6 +45,7 @@ class ListViewModel @Inject constructor(
             _uiState.value = ListUiState.Loading
             try {
                 val list = repository.generate(mondayIsoOf())
+                repository.saveList(list)
                 _uiState.value = ListUiState.Success(list)
             } catch (e: Exception) {
                 _uiState.value = ListUiState.Error(e.message ?: "Could not generate list")

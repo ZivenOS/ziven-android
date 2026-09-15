@@ -4,21 +4,39 @@ import de.ziven.shared.model.AuthUser
 import de.ziven.shared.model.CheckItemRequest
 import de.ziven.shared.model.CompleteCookRequest
 import de.ziven.shared.model.CookSession
+import de.ziven.shared.model.AccountExport
 import de.ziven.shared.model.Credentials
+import de.ziven.shared.model.CreateHouseholdRequest
+import de.ziven.shared.model.DeleteAccountRequest
 import de.ziven.shared.model.GenerateListRequest
 import de.ziven.shared.model.GeneratePlanRequest
 import de.ziven.shared.model.GeneratePlanResponse
+import de.ziven.shared.model.Household
+import de.ziven.shared.model.HouseholdMember
+import de.ziven.shared.model.HouseholdPatch
+import de.ziven.shared.model.Invitation
+import de.ziven.shared.model.InvitationRequest
+import de.ziven.shared.model.JoinHouseholdRequest
 import de.ziven.shared.model.MobileAuthResponse
+import de.ziven.shared.model.NutritionWeek
 import de.ziven.shared.model.OkResponse
 import de.ziven.shared.model.PantryInput
 import de.ziven.shared.model.PantryItem
 import de.ziven.shared.model.PantryPatch
+import de.ziven.shared.model.ImportPlanRequest
+import de.ziven.shared.model.ImportedPlan
 import de.ziven.shared.model.PlanView
+import de.ziven.shared.model.PreviewBundle
+import de.ziven.shared.model.PreviewCatalog
+import de.ziven.shared.model.PreviewPlanRequest
 import de.ziven.shared.model.Product
 import de.ziven.shared.model.ProductSuggestions
+import de.ziven.shared.model.ProfilePatch
 import de.ziven.shared.model.ShoppingList
 import de.ziven.shared.model.StartCookRequest
 import de.ziven.shared.model.TokenBody
+import de.ziven.shared.model.WeightEntry
+import de.ziven.shared.model.WeightLogRequest
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.engine.okhttp.OkHttp
@@ -152,4 +170,76 @@ class ApiClient(baseUrl: String) {
             bearerAuth(token)
             url { parameters.append("q", query) }
         }.body()
+
+    // Nutrition
+    suspend fun getNutritionWeek(token: String, week: String, memberId: String? = null): NutritionWeek =
+        client.get("/v1/nutrition/week") {
+            bearerAuth(token)
+            url {
+                parameters.append("week", week)
+                memberId?.let { parameters.append("memberId", it) }
+            }
+        }.body()
+
+    // Members / weight
+    suspend fun logWeight(token: String, memberId: String, request: WeightLogRequest): WeightEntry =
+        client.post("/v1/members/${memberId}/weight") {
+            bearerAuth(token)
+            setBody(request)
+        }.body()
+
+    suspend fun getWeightSeries(token: String, memberId: String, weeks: Int = 8): List<WeightEntry> =
+        client.get("/v1/members/${memberId}/weight") {
+            bearerAuth(token)
+            url { parameters.append("weeks", weeks.toString()) }
+        }.body()
+
+    // Households
+    suspend fun getCurrentHousehold(token: String): Household =
+        client.get("/v1/households/current") { bearerAuth(token) }.body()
+
+    suspend fun createHousehold(token: String, request: CreateHouseholdRequest): Household =
+        client.post("/v1/households") { bearerAuth(token); setBody(request) }.body()
+
+    suspend fun joinHousehold(token: String, request: JoinHouseholdRequest): Household =
+        client.post("/v1/households/join") { bearerAuth(token); setBody(request) }.body()
+
+    suspend fun updateHousehold(token: String, patch: HouseholdPatch): Household =
+        client.patch("/v1/households/current") { bearerAuth(token); setBody(patch) }.body()
+
+    suspend fun listInvitations(token: String): List<Invitation> =
+        client.get("/v1/households/current/invitations") { bearerAuth(token) }.body()
+
+    suspend fun createInvitation(token: String, request: InvitationRequest): Invitation =
+        client.post("/v1/households/current/invitations") { bearerAuth(token); setBody(request) }.body()
+
+    suspend fun updateMemberProfile(token: String, memberId: String, patch: ProfilePatch): HouseholdMember =
+        client.patch("/v1/households/current/members/${memberId}/profile") {
+            bearerAuth(token)
+            setBody(patch)
+        }.body()
+
+    suspend fun removeMember(token: String, memberId: String): OkResponse =
+        client.delete("/v1/households/current/members/${memberId}") { bearerAuth(token) }.body()
+
+    suspend fun leaveHousehold(token: String): OkResponse =
+        client.post("/v1/households/current/leave") { bearerAuth(token) }.body()
+
+    // Account
+    suspend fun exportAccount(token: String): AccountExport =
+        client.get("/v1/me/export") { bearerAuth(token) }.body()
+
+    suspend fun deleteAccount(token: String, password: String): OkResponse? =
+        client.post("/v1/me/delete") { bearerAuth(token); setBody(DeleteAccountRequest(password)) }.body()
+
+    // Preview (public, no auth)
+    suspend fun previewPlan(request: PreviewPlanRequest): PreviewBundle =
+        client.post("/v1/preview/plan") { setBody(request) }.body()
+
+    suspend fun previewCatalog(): PreviewCatalog =
+        client.get("/v1/preview/catalog").body()
+
+    // Plan import
+    suspend fun importPlan(token: String, request: ImportPlanRequest): ImportedPlan =
+        client.post("/v1/plan/import") { bearerAuth(token); setBody(request) }.body()
 }

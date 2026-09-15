@@ -42,6 +42,12 @@ data class GeneratePlanRequest(
 data class GeneratePlanResponse(val jobId: String)
 
 @Serializable
+data class ImportedPlan(
+    val ok: Boolean,
+    @SerialName("weekStart") val weekStart: String,
+)
+
+@Serializable
 data class StartCookRequest(
     @SerialName("planSlotId") val planSlotId: String? = null,
     @SerialName("recipeId") val recipeId: String? = null,

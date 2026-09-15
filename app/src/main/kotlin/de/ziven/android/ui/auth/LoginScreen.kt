@@ -33,12 +33,36 @@ import androidx.hilt.navigation.compose.hiltViewModel
 fun LoginScreen(
     onLogin: () -> Unit,
     onGoToRegister: () -> Unit,
+    onPreview: () -> Unit,
     viewModel: AuthViewModel = hiltViewModel(),
 ) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     val uiState = viewModel.uiState
 
+    LoginContent(
+        email = email,
+        password = password,
+        uiState = uiState.value,
+        onEmailChange = { email = it },
+        onPasswordChange = { password = it },
+        onLogin = { viewModel.login(email, password, onLogin) },
+        onGoToRegister = onGoToRegister,
+        onPreview = onPreview,
+    )
+}
+
+@Composable
+fun LoginContent(
+    email: String,
+    password: String,
+    uiState: AuthUiState,
+    onEmailChange: (String) -> Unit,
+    onPasswordChange: (String) -> Unit,
+    onLogin: () -> Unit,
+    onGoToRegister: () -> Unit,
+    onPreview: () -> Unit,
+) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -54,7 +78,7 @@ fun LoginScreen(
         Spacer(Modifier.height(32.dp))
         OutlinedTextField(
             value = email,
-            onValueChange = { email = it },
+            onValueChange = onEmailChange,
             label = { Text(stringResource(R.string.email)) },
             modifier = Modifier.fillMaxWidth(),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email, imeAction = ImeAction.Next),
@@ -62,7 +86,7 @@ fun LoginScreen(
         Spacer(Modifier.height(16.dp))
         OutlinedTextField(
             value = password,
-            onValueChange = { password = it },
+            onValueChange = onPasswordChange,
             label = { Text(stringResource(R.string.password)) },
             modifier = Modifier.fillMaxWidth(),
             visualTransformation = PasswordVisualTransformation(),
@@ -70,22 +94,25 @@ fun LoginScreen(
         )
         Spacer(Modifier.height(24.dp))
         Button(
-            onClick = { viewModel.login(email, password, onLogin) },
+            onClick = onLogin,
             modifier = Modifier.fillMaxWidth(),
-            enabled = uiState.value !is AuthUiState.Loading,
+            enabled = uiState !is AuthUiState.Loading,
         ) {
-            if (uiState.value is AuthUiState.Loading) {
+            if (uiState is AuthUiState.Loading) {
                 CircularProgressIndicator(color = MaterialTheme.colorScheme.onPrimary)
             } else {
                 Text(stringResource(R.string.login))
             }
         }
-        (uiState.value as? AuthUiState.Error)?.let { error ->
+        (uiState as? AuthUiState.Error)?.let { error ->
             Spacer(Modifier.height(8.dp))
             Text(error.message, color = MaterialTheme.colorScheme.error)
         }
         TextButton(onClick = onGoToRegister) {
             Text(stringResource(R.string.register))
+        }
+        TextButton(onClick = onPreview) {
+            Text("Erst mal ausprobieren")
         }
     }
 }
