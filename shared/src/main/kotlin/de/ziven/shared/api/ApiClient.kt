@@ -1,5 +1,6 @@
 package de.ziven.shared.api
 
+import de.ziven.shared.model.AuthUser
 import de.ziven.shared.model.Credentials
 import de.ziven.shared.model.MobileAuthResponse
 import de.ziven.shared.model.OkResponse
