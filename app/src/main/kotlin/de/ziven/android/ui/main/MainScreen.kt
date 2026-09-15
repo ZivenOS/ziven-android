@@ -1,5 +1,7 @@
 package de.ziven.android.ui.main
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
@@ -22,6 +24,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import de.ziven.android.R
@@ -33,6 +36,7 @@ import de.ziven.android.ui.pantry.PantryScreen
 import de.ziven.android.ui.pantry.PantryViewModel
 import de.ziven.android.ui.plan.PlanScreen
 import de.ziven.android.ui.plan.PlanViewModel
+import de.ziven.android.ui.theme.ZivenBackdrop
 import de.ziven.android.ui.today.TodayScreen
 import de.ziven.android.ui.today.TodayViewModel
 
@@ -60,21 +64,24 @@ fun MainScreen(onLogout: () -> Unit, onCookSlot: (String) -> Unit, onScanBarcode
         stringResource(R.string.nav_more) to Icons.Default.MoreVert,
     )
 
-    Scaffold(
-        snackbarHost = { SnackbarHost(snackbarHost) },
-        bottomBar = {
-            NavigationBar {
-                items.forEachIndexed { index, (label, icon) ->
-                    NavigationBarItem(
-                        selected = selected == index,
-                        onClick = { selected = index },
-                        icon = { Icon(icon, contentDescription = label) },
-                        label = { Text(label) },
-                    )
+    Box(modifier = Modifier.fillMaxSize()) {
+        ZivenBackdrop(modifier = Modifier.fillMaxSize())
+        Scaffold(
+            containerColor = Color.Transparent,
+            snackbarHost = { SnackbarHost(snackbarHost) },
+            bottomBar = {
+                NavigationBar {
+                    items.forEachIndexed { index, (label, icon) ->
+                        NavigationBarItem(
+                            selected = selected == index,
+                            onClick = { selected = index },
+                            icon = { Icon(icon, contentDescription = label) },
+                            label = { Text(label) },
+                        )
+                    }
                 }
-            }
-        },
-    ) { padding ->
+            },
+        ) { padding ->
         val modifier = Modifier.padding(padding)
         when (selected) {
             0 -> TodayScreen(onCookSlot = onCookSlot, viewModel = hiltViewModel())
@@ -83,5 +90,6 @@ fun MainScreen(onLogout: () -> Unit, onCookSlot: (String) -> Unit, onScanBarcode
             3 -> PantryScreen(onScanBarcode = onScanBarcode, viewModel = hiltViewModel())
             4 -> MoreScreen(onLogout = onLogout, viewModel = hiltViewModel())
         }
+    }
     }
 }
